@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 Superflex TE-Premium Draft Kit</title>
+    <title>The 2X Champ's Pity Draft Kit</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Chosen Palette: Warm Neutral (Stone, Slate, Sky) -->
@@ -44,22 +44,31 @@
         .table-cell-pos { width: 8%; }
         .table-cell-adp { width: 8%; }
         .table-cell-draft { width: 10%; }
+        .code-block {
+            background-color: #1f2937;
+            color: #d1d5db;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body class="bg-stone-100 text-slate-800">
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">The 2025 League-Winner's Blueprint</h1>
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">The 2X Champ's Pity Draft Kit</h1>
             <p class="text-lg text-slate-600 mt-2">Interactive Draft Kit for Superflex, 0.5 PPR, TE Premium Leagues</p>
+            <p class="text-md text-slate-500 italic mt-1">For the Poker Grinders Sleeper League</p>
         </header>
 
         <nav class="flex flex-wrap justify-center border-b-2 border-stone-200 mb-8">
             <button data-tab="dashboard" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none tab-active">Dashboard</button>
             <button data-tab="rankings" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Full Rankings</button>
             <button data-tab="tiers" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Positional Tiers</button>
-            <button data-tab="adp" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">ADP Arbitrage</button>
-            <button data-tab="strategy" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Strategy Deep Dive</button>
+            <button data-tab="customize" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Customize Your Rankings</button>
         </nav>
 
         <main>
@@ -136,31 +145,43 @@
                     <div id="tier-display"></div>
                 </div>
             </div>
-
-            <div id="adp-content" class="tab-content hidden space-y-8">
+            
+            <div id="customize-content" class="tab-content hidden space-y-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-2">Exploiting Market Inefficiencies: ADP Arbitrage</h2>
-                    <p class="text-slate-700 leading-relaxed mb-6">Average Draft Position (ADP) varies significantly across fantasy platforms (ESPN, Yahoo, Sleeper, Underdog), creating market inefficiencies. A player might be a value on one site but a reach on another. The chart below visualizes these discrepancies for key players, helping you identify where to find the best value and exploit the biases of your leaguemates.</p>
-                    <div class="chart-container h-72 md:h-96">
-                        <canvas id="adpChart"></canvas>
-                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4">Make This Draft Kit Your Own (No, Really)</h2>
+                    <p class="text-slate-700 leading-relaxed mb-6">Don't trust the champ's rankings? Think you know better? Perfect. This entire tool is just a single file. You can download it and plug in any player list you want. Here’s the simple, beginner-friendly guide:</p>
+                    
+                    <ol class="space-y-6 text-slate-700 list-decimal list-inside">
+                        <li>
+                            <h3 class="font-semibold text-lg mb-2 inline">Save This Webpage</h3>
+                            <p class="inline">In your browser, right-click anywhere on the page and choose "Save As...". Save the file to your computer. Make sure the format is "Webpage, Complete" or "HTML Only".</p>
+                            <img src="https://placehold.co/600x250/e2e8f0/475569?text=Example:\+Browser's+'Save+As...'+Dialog" alt="Example of Save As dialog in a browser" class="mt-2 rounded-lg shadow-md mx-auto w-full max-w-lg">
+                        </li>
+                        <li>
+                            <h3 class="font-semibold text-lg mb-2 inline">Open With a Text Editor</h3>
+                            <p class="inline">Find the `.html` file you just saved. Right-click on it, go to "Open with," and select a basic text editor like **Notepad** (on Windows) or **TextEdit** (on Mac).</p>
+                            <img src="https://placehold.co/600x300/e2e8f0/475569?text=Example:\+'Open+with...'+Menu" alt="Example of right-click open with menu" class="mt-2 rounded-lg shadow-md mx-auto w-full max-w-lg">
+                        </li>
+                        <li>
+                            <h3 class="font-semibold text-lg mb-2 inline">Find the Player Data</h3>
+                            <p class="inline">Inside the text editor, press `Ctrl + F` (or `Cmd + F` on Mac) to open the search box. Type `const allPlayers` and press Enter. It will take you right to the start of the player list.</p>
+                        </li>
+                        <li>
+                            <h3 class="font-semibold text-lg mb-2 inline">Replace the Old Rankings</h3>
+                            <p class="inline">Carefully select everything from `const allPlayers = [` all the way down to the closing `];`. Press Delete. Then, paste in your own player list. The format for each player must look like the example below.</p>
+                            <img src="https://placehold.co/600x350/1f2937/d1d5db?text=Highlight+from+const+allPlayers...%0A...down+to+the+closing+];" alt="Example of code highlighted in a text editor" class="mt-2 rounded-lg shadow-md mx-auto w-full max-w-lg">
+                            <div class="code-block text-sm mt-4">
+{ rank: 1, name: 'Your Player', team: 'TEAM', pos: 'QB', tier: 1, ecr: 1, adp: { espn: 'N/A', yahoo: 'N/A', sleeper: 'N/A' } },
+                            </div>
+                        </li>
+                         <li>
+                            <h3 class="font-semibold text-lg mb-2 inline">Save and You're Done!</h3>
+                            <p class="inline">Save the file. Now you can open that file in your browser anytime to use your very own offline draft kit with your custom rankings. Good luck (you'll need it).</p>
+                        </li>
+                    </ol>
                 </div>
             </div>
 
-            <div id="strategy-content" class="tab-content hidden space-y-6">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">The Shifting Tides of NFL Offense: Macro Trends You Must Know</h3>
-                    <p class="text-slate-700 leading-relaxed">Over the past five years, a significant strategic shift has reshaped the landscape of NFL offense. The proliferation of two-high safety defensive shells—a strategy designed to prevent explosive, downfield passing plays—has become the league's dominant defensive paradigm... This strategic chess match has profound implications for fantasy football, fundamentally altering the valuation of certain player archetypes. The offensive counter-attack to two-high defenses elevates players who thrive in the short-to-intermediate areas of the field.</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Quarterback: The Superflex Cornerstone</h3>
-                    <p class="text-slate-700 leading-relaxed">In a Superflex format, the quarterback position is not just another piece of the puzzle; it is the cornerstone upon which a championship roster is built... A comprehensive analysis of fantasy finishes versus team quality reveals a powerful correlation: elite, league-winning quarterback production is almost exclusively found on successful NFL teams. The data validates an aggressive approach, such as securing two quarterbacks within the first four rounds, as a foundational strategy.</p>
-                </div>
-                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Draft Strategy Blueprint</h3>
-                    <p class="text-slate-700 leading-relaxed"><strong>Early Rounds (1-4): Seize the Advantage.</strong> The primary objective is to secure the two most significant positional advantages available: quarterback and tight end. The "Two QBs in the First Four Rounds" strategy is optimal. <br><br><strong>Middle Rounds (5-8): Build Your Core.</strong> This is where championships are often won. Aggressively target high-upside running backs and wide receivers. This is the ideal range to find value in proven veterans who may be discounted due to age or perceived injury risk.<br><br><strong>Late Rounds (9-12+): Depth and Upside.</strong> The final rounds are for building a robust bench and taking calculated risks. Target running back handcuffs and wide receivers in ambiguous situations who possess the talent to emerge as primary targets.</p>
-                </div>
-            </div>
         </main>
     </div>
 
@@ -632,58 +653,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createADPChart() {
-        const adpPlayers = [
-            allPlayers.find(p => p.name === 'Ja\'Marr Chase'),
-            allPlayers.find(p => p.name === 'Patrick Mahomes'),
-            allPlayers.find(p => p.name === 'Bijan Robinson'),
-            allPlayers.find(p => p.name === 'Saquon Barkley')
-        ].filter(p => p); // This removes any undefined players if they aren't found
+        const adpChartCanvas = document.getElementById('adpChart');
+        if (adpChartCanvas) {
+            const adpPlayers = [
+                allPlayers.find(p => p.name === 'Ja\'Marr Chase'),
+                allPlayers.find(p => p.name === 'Patrick Mahomes'),
+                allPlayers.find(p => p.name === 'Bijan Robinson'),
+                allPlayers.find(p => p.name === 'Saquon Barkley')
+            ].filter(p => p);
 
-        const ctx = document.getElementById('adpChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: adpPlayers.map(p => p.name),
-                datasets: [
-                    {
-                        label: 'ESPN ADP',
-                        data: adpPlayers.map(p => p.adp.espn),
-                        backgroundColor: '#ef4444',
-                    },
-                    {
-                        label: 'Yahoo ADP',
-                        data: adpPlayers.map(p => p.adp.yahoo),
-                        backgroundColor: '#8b5cf6',
-                    },
-                    {
-                        label: 'Sleeper ADP',
-                        data: adpPlayers.map(p => p.adp.sleeper),
-                        backgroundColor: '#22c55e',
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Average Draft Position (Overall)' }
-                    }
+            const ctx = adpChartCanvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: adpPlayers.map(p => p.name),
+                    datasets: [
+                        {
+                            label: 'ESPN ADP',
+                            data: adpPlayers.map(p => p.adp.espn),
+                            backgroundColor: '#ef4444',
+                        },
+                        {
+                            label: 'Yahoo ADP',
+                            data: adpPlayers.map(p => p.adp.yahoo),
+                            backgroundColor: '#8b5cf6',
+                        },
+                        {
+                            label: 'Sleeper ADP',
+                            data: adpPlayers.map(p => p.adp.sleeper),
+                            backgroundColor: '#22c55e',
+                        }
+                    ]
                 },
-                plugins: {
-                    title: { display: true, text: 'ADP Discrepancies Across Platforms' },
-                    tooltip: { mode: 'index', intersect: false }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Average Draft Position (Overall)' }
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'ADP Discrepancies Across Platforms' },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     
     filterAndRender();
     renderDraftedPlayers();
     renderTiers('QB');
     createTEPremiumChart();
-    createADPChart();
+    // createADPChart(); // ADP Chart is removed for now
 });
 </script>
 </body>
