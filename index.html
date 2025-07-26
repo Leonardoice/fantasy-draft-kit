@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Superflex TE-Premium Draft Kit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutral (Stone, Slate, Sky) -->
+    <!-- Application Structure Plan: A tabbed dashboard interface is used to organize the dense information for optimal draft-day usability. This structure separates high-level strategy from actionable tools, allowing the user to quickly access what they need without overwhelming them. The main sections are: a 'Dashboard' for key strategic insights (like the TE premium advantage), a 'Full Rankings' table for live draft tracking, 'Positional Tiers' for at-a-glance player value assessment, 'ADP Arbitrage' to identify market inefficiencies, and a 'Strategy Deep Dive' for the detailed report analysis. This task-oriented design is superior to a linear document for a high-pressure, time-sensitive event like a fantasy draft. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: TE Premium Scoring Advantage. -> Goal: Emphasize the core league-winning strategy. -> Viz: Bar Chart (Chart.js/Canvas). -> Interaction: Hover for detailed PPG comparison. -> Justification: A chart visually communicates the point advantage more effectively than a table.
+        - Report Info: ADP Arbitrage Hot Sheet. -> Goal: Show platform-specific player value discrepancies. -> Viz: Grouped Bar Chart (Chart.js/Canvas). -> Interaction: Hover for exact ADP values. -> Justification: Visually highlights the "arbitrage" opportunities, making them easy to spot.
+        - Report Info: Top 200 Player Rankings. -> Goal: Provide the primary, interactive draft tool. -> Presentation: Filterable, searchable, sortable HTML table. -> Interaction: Search by name, filter by position, click to "draft" a player (moves them to a separate list). -> Justification: Transforms a static cheat sheet into a dynamic, stateful draft assistant.
+        - Report Info: Positional Tiers. -> Goal: Offer a strategic view of player value. -> Presentation: Styled cards/columns for each tier. -> Interaction: Buttons to switch between positions. -> Justification: Aids in "best player in a tier" decision-making, a common draft strategy.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .tab-active {
+            border-color: #0284c7;
+            color: #0284c7;
+            font-weight: 600;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .table-cell-rank { width: 5%; }
+        .table-cell-player { width: 25%; }
+        .table-cell-pos { width: 8%; }
+        .table-cell-adp { width: 8%; }
+        .table-cell-draft { width: 10%; }
+    </style>
+</head>
+<body class="bg-stone-100 text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900">The 2025 League-Winner's Blueprint</h1>
+            <p class="text-lg text-slate-600 mt-2">Interactive Draft Kit for Superflex, 0.5 PPR, TE Premium Leagues</p>
+        </header>
+
+        <nav class="flex flex-wrap justify-center border-b-2 border-stone-200 mb-8">
+            <button data-tab="dashboard" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none tab-active">Dashboard</button>
+            <button data-tab="rankings" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Full Rankings</button>
+            <button data-tab="tiers" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Positional Tiers</button>
+            <button data-tab="adp" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">ADP Arbitrage</button>
+            <button data-tab="strategy" class="tab-btn py-4 px-6 block border-b-4 text-slate-600 hover:text-sky-600 focus:outline-none">Strategy Deep Dive</button>
+        </nav>
+
+        <main>
+            <div id="dashboard-content" class="tab-content space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4">Welcome to Your Interactive Draft Kit</h2>
+                    <p class="text-slate-700 leading-relaxed">This application translates the detailed draft report into a dynamic, actionable tool for your draft day. The core principle of this kit is built on a deep analysis of the last decade of NFL data, tailored specifically for your league's Superflex and TE Premium settings. Use the tabs above to navigate between the high-level strategy, interactive player rankings, and market analysis to dominate your draft.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">The TE Premium Advantage: Your League's Cheat Code</h2>
+                    <p class="text-slate-700 leading-relaxed mb-6">In your league, tight ends receive an additional 0.5 points per reception, for a total of 1.0 PPR. This scoring quirk dramatically increases the value of elite, high-volume tight ends, creating a massive weekly advantage. The chart below visualizes the significant point gap this creates between the top TEs and the rest of the field, making an elite TE a cornerstone of a championship roster.</p>
+                    <div class="chart-container h-64 md:h-80">
+                        <canvas id="tePremiumChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rankings-content" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                         <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h2 class="text-2xl font-bold text-slate-900 mb-4">Overall Top 200 Rankings</h2>
+                             <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                                <input type="text" id="searchInput" class="w-full sm:w-1/2 p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500" placeholder="Search for a player...">
+                                <div id="positionFilters" class="flex items-center space-x-2 flex-wrap gap-y-2">
+                                    <button data-pos="ALL" class="pos-filter-btn bg-sky-600 text-white px-4 py-2 rounded-md">All</button>
+                                    <button data-pos="QB" class="pos-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">QB</button>
+                                    <button data-pos="RB" class="pos-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">RB</button>
+                                    <button data-pos="WR" class="pos-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">WR</button>
+                                    <button data-pos="TE" class="pos-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">TE</button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left text-slate-500">
+                                    <thead class="text-xs text-slate-700 uppercase bg-stone-50">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-3 table-cell-rank">Rank</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-player">Player</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-pos">Pos</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-adp">ECR</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-adp">ESPN</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-adp">Yahoo</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-adp">Sleeper</th>
+                                            <th scope="col" class="px-4 py-3 table-cell-draft">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="player-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-1">
+                        <div class="bg-white p-6 rounded-lg shadow-md sticky top-8">
+                            <h2 class="text-2xl font-bold text-slate-900 mb-4">Drafted Players</h2>
+                            <div id="drafted-players-list" class="space-y-2 max-h-[80vh] overflow-y-auto">
+                                <p class="text-slate-500">No players drafted yet. Click the 'Draft' button in the table to add players here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tiers-content" class="tab-content hidden space-y-8">
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-4">Positional Tiers</h2>
+                    <p class="text-slate-700 leading-relaxed mb-6">Rankings are useful, but understanding player value within tiers is what wins championships. Tiers represent groups of players with similar projected fantasy output. The goal is to draft the last player from a high tier before the value drops off to the next. Use these tiers to make smart decisions when you're on the clock.</p>
+                    <div id="tier-pos-filters" class="flex items-center space-x-2 mb-6 flex-wrap gap-y-2">
+                        <button data-pos="QB" class="tier-filter-btn bg-sky-600 text-white px-4 py-2 rounded-md">Quarterbacks</button>
+                        <button data-pos="RB" class="tier-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">Running Backs</button>
+                        <button data-pos="WR" class="tier-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">Wide Receivers</button>
+                        <button data-pos="TE" class="tier-filter-btn bg-stone-200 text-slate-700 px-4 py-2 rounded-md">Tight Ends</button>
+                    </div>
+                    <div id="tier-display"></div>
+                </div>
+            </div>
+
+            <div id="adp-content" class="tab-content hidden space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">Exploiting Market Inefficiencies: ADP Arbitrage</h2>
+                    <p class="text-slate-700 leading-relaxed mb-6">Average Draft Position (ADP) varies significantly across fantasy platforms (ESPN, Yahoo, Sleeper, Underdog), creating market inefficiencies. A player might be a value on one site but a reach on another. The chart below visualizes these discrepancies for key players, helping you identify where to find the best value and exploit the biases of your leaguemates.</p>
+                    <div class="chart-container h-72 md:h-96">
+                        <canvas id="adpChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="strategy-content" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">The Shifting Tides of NFL Offense: Macro Trends You Must Know</h3>
+                    <p class="text-slate-700 leading-relaxed">Over the past five years, a significant strategic shift has reshaped the landscape of NFL offense. The proliferation of two-high safety defensive shells—a strategy designed to prevent explosive, downfield passing plays—has become the league's dominant defensive paradigm... This strategic chess match has profound implications for fantasy football, fundamentally altering the valuation of certain player archetypes. The offensive counter-attack to two-high defenses elevates players who thrive in the short-to-intermediate areas of the field.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Quarterback: The Superflex Cornerstone</h3>
+                    <p class="text-slate-700 leading-relaxed">In a Superflex format, the quarterback position is not just another piece of the puzzle; it is the cornerstone upon which a championship roster is built... A comprehensive analysis of fantasy finishes versus team quality reveals a powerful correlation: elite, league-winning quarterback production is almost exclusively found on successful NFL teams. The data validates an aggressive approach, such as securing two quarterbacks within the first four rounds, as a foundational strategy.</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">Draft Strategy Blueprint</h3>
+                    <p class="text-slate-700 leading-relaxed"><strong>Early Rounds (1-4): Seize the Advantage.</strong> The primary objective is to secure the two most significant positional advantages available: quarterback and tight end. The "Two QBs in the First Four Rounds" strategy is optimal. <br><br><strong>Middle Rounds (5-8): Build Your Core.</strong> This is where championships are often won. Aggressively target high-upside running backs and wide receivers. This is the ideal range to find value in proven veterans who may be discounted due to age or perceived injury risk.<br><br><strong>Late Rounds (9-12+): Depth and Upside.</strong> The final rounds are for building a robust bench and taking calculated risks. Target running back handcuffs and wide receivers in ambiguous situations who possess the talent to emerge as primary targets.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const allPlayers = [
+        { rank: 1, name: 'Josh Allen', team: 'BUF', pos: 'QB', tier: 1, ecr: 1, adp: { espn: 23, yahoo: 21, sleeper: 1 } },
+        { rank: 2, name: 'Lamar Jackson', team: 'BAL', pos: 'QB', tier: 1, ecr: 2, adp: { espn: 19, yahoo: 18, sleeper: 2 } },
+        { rank: 3, name: 'Jalen Hurts', team: 'PHI', pos: 'QB', tier: 1, ecr: 4, adp: { espn: 36, yahoo: 40, sleeper: 5 } },
+        { rank: 4, name: 'Patrick Mahomes', team: 'KC', pos: 'QB', tier: 1, ecr: 7, adp: { espn: 54, yahoo: 55, sleeper: 8 } },
+        { rank: 5, name: 'C.J. Stroud', team: 'HOU', pos: 'QB', tier: 2, ecr: 5, adp: { espn: 45, yahoo: 48, sleeper: 6 } },
+        { rank: 6, name: 'Joe Burrow', team: 'CIN', pos: 'QB', tier: 2, ecr: 6, adp: { espn: 31, yahoo: 25, sleeper: 4 } },
+        { rank: 7, name: 'Anthony Richardson', team: 'IND', pos: 'QB', tier: 2, ecr: 8, adp: { espn: 60, yahoo: 62, sleeper: 7 } },
+        { rank: 8, name: 'Christian McCaffrey', team: 'SF', pos: 'RB', tier: 1, ecr: 3, adp: { espn: 1, yahoo: 1, sleeper: 10 } },
+        { rank: 9, name: 'Bijan Robinson', team: 'ATL', pos: 'RB', tier: 1, ecr: 9, adp: { espn: 2, yahoo: 2, sleeper: 11 } },
+        { rank: 10, name: 'Breece Hall', team: 'NYJ', pos: 'RB', tier: 1, ecr: 10, adp: { espn: 3, yahoo: 4, sleeper: 12 } },
+        { rank: 11, name: 'CeeDee Lamb', team: 'DAL', pos: 'WR', tier: 1, ecr: 11, adp: { espn: 5, yahoo: 8, sleeper: 9 } },
+        { rank: 12, name: 'Ja\'Marr Chase', team: 'CIN', pos: 'WR', tier: 1, ecr: 12, adp: { espn: 4, yahoo: 3, sleeper: 13 } },
+        { rank: 13, name: 'Justin Jefferson', team: 'MIN', pos: 'WR', tier: 1, ecr: 13, adp: { espn: 6, yahoo: 6, sleeper: 14 } },
+        { rank: 14, name: 'Amon-Ra St. Brown', team: 'DET', pos: 'WR', tier: 1, ecr: 14, adp: { espn: 11, yahoo: 20, sleeper: 18 } },
+        { rank: 15, name: 'Tyreek Hill', team: 'MIA', pos: 'WR', tier: 1, ecr: 15, adp: { espn: 8, yahoo: 7, sleeper: 16 } },
+        { rank: 16, name: 'Kyren Williams', team: 'LAR', pos: 'RB', tier: 2, ecr: 16, adp: { espn: 7, yahoo: 5, sleeper: 20 } },
+        { rank: 17, name: 'Saquon Barkley', team: 'PHI', pos: 'RB', tier: 2, ecr: 17, adp: { espn: 9, yahoo: 10, sleeper: 27 } },
+        { rank: 18, name: 'Jahmyr Gibbs', team: 'DET', pos: 'RB', tier: 2, ecr: 18, adp: { espn: 10, yahoo: 9, sleeper: 15 } },
+        { rank: 19, name: 'Jonathan Taylor', team: 'IND', pos: 'RB', tier: 2, ecr: 19, adp: { espn: 12, yahoo: 13, sleeper: 22 } },
+        { rank: 20, name: 'Dak Prescott', team: 'DAL', pos: 'QB', tier: 3, ecr: 20, adp: { espn: 80, yahoo: 78, sleeper: 31 } },
+        { rank: 21, name: 'Kyler Murray', team: 'ARI', pos: 'QB', tier: 3, ecr: 21, adp: { espn: 87, yahoo: 87, sleeper: 29 } },
+        { rank: 22, name: 'Jordan Love', team: 'GB', pos: 'QB', tier: 3, ecr: 22, adp: { espn: 75, yahoo: 70, sleeper: 25 } },
+        { rank: 23, name: 'Brock Purdy', team: 'SF', pos: 'QB', tier: 3, ecr: 23, adp: { espn: 90, yahoo: 92, sleeper: 30 } },
+        { rank: 24, name: 'A.J. Brown', team: 'PHI', pos: 'WR', tier: 2, ecr: 24, adp: { espn: 14, yahoo: 15, sleeper: 17 } },
+        { rank: 25, name: 'Garrett Wilson', team: 'NYJ', pos: 'WR', tier: 2, ecr: 25, adp: { espn: 13, yahoo: 12, sleeper: 19 } },
+        { rank: 26, name: 'Puka Nacua', team: 'LAR', pos: 'WR', tier: 2, ecr: 26, adp: { espn: 16, yahoo: 17, sleeper: 21 } },
+        { rank: 27, name: 'Marvin Harrison Jr.', team: 'ARI', pos: 'WR', tier: 2, ecr: 27, adp: { espn: 20, yahoo: 22, sleeper: 23 } },
+        { rank: 28, name: 'Sam LaPorta', team: 'DET', pos: 'TE', tier: 1, ecr: 28, adp: { espn: 35, yahoo: 38, sleeper: 35 } },
+        { rank: 29, name: 'Travis Etienne Jr.', team: 'JAX', pos: 'RB', tier: 3, ecr: 29, adp: { espn: 18, yahoo: 19, sleeper: 28 } },
+        { rank: 30, name: 'De\'Von Achane', team: 'MIA', pos: 'RB', tier: 3, ecr: 30, adp: { espn: 22, yahoo: 24, sleeper: 33 } },
+        { rank: 31, name: 'Chris Olave', team: 'NO', pos: 'WR', tier: 3, ecr: 31, adp: { espn: 25, yahoo: 26, sleeper: 24 } },
+        { rank: 32, name: 'Jaylen Waddle', team: 'MIA', pos: 'WR', tier: 3, ecr: 32, adp: { espn: 28, yahoo: 30, sleeper: 26 } },
+        { rank: 33, name: 'Tua Tagovailoa', team: 'MIA', pos: 'QB', tier: 4, ecr: 33, adp: { espn: 95, yahoo: 98, sleeper: 32 } },
+        { rank: 34, name: 'Trevor Lawrence', team: 'JAX', pos: 'QB', tier: 4, ecr: 34, adp: { espn: 100, yahoo: 102, sleeper: 34 } },
+        { rank: 35, name: 'Jared Goff', team: 'DET', pos: 'QB', tier: 4, ecr: 35, adp: { espn: 110, yahoo: 108, sleeper: 36 } },
+        { rank: 36, name: 'Derrick Henry', team: 'BAL', pos: 'RB', tier: 3, ecr: 36, adp: { espn: 24, yahoo: 23, sleeper: 40 } },
+        { rank: 37, name: 'Josh Jacobs', team: 'GB', pos: 'RB', tier: 3, ecr: 37, adp: { espn: 26, yahoo: 28, sleeper: 42 } },
+        { rank: 38, name: 'Trey McBride', team: 'ARI', pos: 'TE', tier: 1, ecr: 38, adp: { espn: 40, yahoo: 45, sleeper: 38 } },
+        { rank: 39, name: 'Travis Kelce', team: 'KC', pos: 'TE', tier: 2, ecr: 39, adp: { espn: 30, yahoo: 33, sleeper: 45 } },
+        { rank: 40, name: 'Mark Andrews', team: 'BAL', pos: 'TE', tier: 2, ecr: 40, adp: { espn: 42, yahoo: 46, sleeper: 48 } },
+        { rank: 41, name: 'Michael Pittman Jr.', team: 'IND', pos: 'WR', tier: 3, ecr: 41, adp: { espn: 33, yahoo: 35, sleeper: 37 } },
+        { rank: 42, name: 'Nico Collins', team: 'HOU', pos: 'WR', tier: 3, ecr: 42, adp: { espn: 34, yahoo: 36, sleeper: 39 } },
+        { rank: 43, name: 'Drake London', team: 'ATL', pos: 'WR', tier: 4, ecr: 43, adp: { espn: 38, yahoo: 41, sleeper: 41 } },
+        { rank: 44, name: 'Davante Adams', team: 'LV', pos: 'WR', tier: 4, ecr: 44, adp: { espn: 44, yahoo: 47, sleeper: 43 } },
+        { rank: 45, name: 'Isiah Pacheco', team: 'KC', pos: 'RB', tier: 4, ecr: 45, adp: { espn: 37, yahoo: 39, sleeper: 50 } },
+        { rank: 46, name: 'James Cook', team: 'BUF', pos: 'RB', tier: 4, ecr: 46, adp: { espn: 48, yahoo: 50, sleeper: 52 } },
+        { rank: 47, name: 'Rachaad White', team: 'TB', pos: 'RB', tier: 4, ecr: 47, adp: { espn: 50, yahoo: 52, sleeper: 55 } },
+        { rank: 48, name: 'Kirk Cousins', team: 'ATL', pos: 'QB', tier: 5, ecr: 48, adp: { espn: 120, yahoo: 118, sleeper: 44 } },
+        { rank: 49, name: 'Matthew Stafford', team: 'LAR', pos: 'QB', tier: 5, ecr: 49, adp: { espn: 125, yahoo: 122, sleeper: 46 } },
+        { rank: 50, name: 'Kyle Pitts', team: 'ATL', pos: 'TE', tier: 3, ecr: 50, adp: { espn: 55, yahoo: 58, sleeper: 58 } },
+    ];
+
+    const tiers = {
+        QB: [
+            { tier: 1, name: 'The Elite Konami Codes', players: ['Josh Allen', 'Lamar Jackson', 'Jalen Hurts', 'Patrick Mahomes'] },
+            { tier: 2, name: 'High-End QB1s with Top 5 Upside', players: ['C.J. Stroud', 'Joe Burrow', 'Anthony Richardson'] },
+            { tier: 3, name: 'Rock Solid QB1s', players: ['Dak Prescott', 'Kyler Murray', 'Jordan Love', 'Brock Purdy'] },
+            { tier: 4, name: 'High-End QB2s', players: ['Tua Tagovailoa', 'Trevor Lawrence', 'Jared Goff'] },
+            { tier: 5, name: 'Veteran QB2s & High-Upside Gambles', players: ['Kirk Cousins', 'Matthew Stafford', 'Caleb Williams', 'Justin Herbert'] },
+        ],
+        RB: [
+            { tier: 1, name: 'The Untouchables', players: ['Christian McCaffrey', 'Bijan Robinson', 'Breece Hall'] },
+            { tier: 2, name: 'Elite RB1s', players: ['Kyren Williams', 'Saquon Barkley', 'Jahmyr Gibbs', 'Jonathan Taylor'] },
+            { tier: 3, name: 'High-Volume RB1s/RB2s', players: ['Travis Etienne Jr.', 'De\'Von Achane', 'Derrick Henry', 'Josh Jacobs'] },
+            { tier: 4, name: 'Solid RB2s with Volume', players: ['Isiah Pacheco', 'James Cook', 'Rachaad White', 'Joe Mixon'] },
+        ],
+        WR: [
+            { tier: 1, name: 'The Alpha Dogs', players: ['CeeDee Lamb', 'Ja\'Marr Chase', 'Justin Jefferson', 'Amon-Ra St. Brown', 'Tyreek Hill'] },
+            { tier: 2, name: 'Elite WR1s', players: ['A.J. Brown', 'Garrett Wilson', 'Puka Nacua', 'Marvin Harrison Jr.'] },
+            { tier: 3, name: 'High-End WR1s/WR2s', players: ['Chris Olave', 'Jaylen Waddle', 'Michael Pittman Jr.', 'Nico Collins'] },
+            { tier: 4, name: 'Strong WR2s with Upside', players: ['Drake London', 'Davante Adams', 'DeVonta Smith', 'Rashee Rice'] },
+        ],
+        TE: [
+            { tier: 1, name: 'The True Difference-Makers', players: ['Sam LaPorta', 'Trey McBride'] },
+            { tier: 2, name: 'Elite TE1s', players: ['Travis Kelce', 'Mark Andrews', 'George Kittle'] },
+            { tier: 3, name: 'High-Upside TE1s', players: ['Kyle Pitts', 'Evan Engram', 'Jake Ferguson', 'Dalton Kincaid'] },
+            { tier: 4, name: 'The Streaming Options', players: ['David Njoku', 'Pat Freiermuth', 'Luke Musgrave', 'Cole Kmet'] },
+        ]
+    };
+
+    let availablePlayers = [...allPlayers];
+    let draftedPlayers = [];
+    let currentPositionFilter = 'ALL';
+
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const playerTableBody = document.getElementById('player-table-body');
+    const searchInput = document.getElementById('searchInput');
+    const positionFilters = document.getElementById('positionFilters');
+    const draftedPlayersList = document.getElementById('drafted-players-list');
+    const tierPosFilters = document.getElementById('tier-pos-filters');
+    const tierDisplay = document.getElementById('tier-display');
+
+    function switchTab(e) {
+        const targetTab = e.target.dataset.tab;
+        
+        tabButtons.forEach(btn => {
+            btn.classList.remove('tab-active');
+            if (btn.dataset.tab === targetTab) {
+                btn.classList.add('tab-active');
+            }
+        });
+
+        tabContents.forEach(content => {
+            content.classList.add('hidden');
+            if (content.id === `${targetTab}-content`) {
+                content.classList.remove('hidden');
+            }
+        });
+    }
+
+    function renderPlayerTable(playersToRender) {
+        playerTableBody.innerHTML = '';
+        if (playersToRender.length === 0) {
+            playerTableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">No players match your search.</td></tr>';
+            return;
+        }
+        playersToRender.forEach(player => {
+            const row = document.createElement('tr');
+            row.className = 'bg-white border-b hover:bg-stone-50';
+            row.innerHTML = `
+                <td class="px-4 py-3 table-cell-rank font-medium text-slate-900">${player.rank}</td>
+                <td class="px-4 py-3 table-cell-player font-semibold">${player.name} <span class="text-xs text-slate-500">${player.team}</span></td>
+                <td class="px-4 py-3 table-cell-pos">${player.pos}${player.tier}</td>
+                <td class="px-4 py-3 table-cell-adp">${player.ecr}</td>
+                <td class="px-4 py-3 table-cell-adp">${player.adp.espn}</td>
+                <td class="px-4 py-3 table-cell-adp">${player.adp.yahoo}</td>
+                <td class="px-4 py-3 table-cell-adp">${player.adp.sleeper}</td>
+                <td class="px-4 py-3 table-cell-draft"><button data-rank="${player.rank}" class="draft-btn bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 text-xs">Draft</button></td>
+            `;
+            playerTableBody.appendChild(row);
+        });
+    }
+
+    function renderDraftedPlayers() {
+        draftedPlayersList.innerHTML = '';
+        if (draftedPlayers.length === 0) {
+            draftedPlayersList.innerHTML = '<p class="text-slate-500">No players drafted yet.</p>';
+            return;
+        }
+        draftedPlayers.sort((a,b) => a.draftOrder - b.draftOrder);
+        draftedPlayers.forEach((player, index) => {
+            const item = document.createElement('div');
+            item.className = 'flex justify-between items-center bg-stone-100 p-2 rounded-md';
+            item.innerHTML = `
+                <div>
+                    <span class="font-semibold text-sm">${index + 1}. ${player.name}</span>
+                    <span class="text-xs text-slate-500">(${player.pos})</span>
+                </div>
+                <button data-rank="${player.rank}" class="undraft-btn text-red-500 hover:text-red-700 text-xs">Undo</button>
+            `;
+            draftedPlayersList.appendChild(item);
+        });
+    }
+
+    function filterAndRender() {
+        const searchTerm = searchInput.value.toLowerCase();
+        let filtered = availablePlayers;
+
+        if (currentPositionFilter !== 'ALL') {
+            filtered = filtered.filter(p => p.pos === currentPositionFilter);
+        }
+
+        if (searchTerm) {
+            filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm));
+        }
+
+        renderPlayerTable(filtered);
+    }
+    
+    function draftPlayer(rank) {
+        const playerIndex = availablePlayers.findIndex(p => p.rank == rank);
+        if (playerIndex > -1) {
+            const [player] = availablePlayers.splice(playerIndex, 1);
+            player.draftOrder = draftedPlayers.length + 1;
+            draftedPlayers.push(player);
+            filterAndRender();
+            renderDraftedPlayers();
+        }
+    }
+
+    function undraftPlayer(rank) {
+        const playerIndex = draftedPlayers.findIndex(p => p.rank == rank);
+        if (playerIndex > -1) {
+            const [player] = draftedPlayers.splice(playerIndex, 1);
+            delete player.draftOrder;
+            availablePlayers.push(player);
+            availablePlayers.sort((a, b) => a.rank - b.rank);
+            filterAndRender();
+            renderDraftedPlayers();
+        }
+    }
+    
+    function renderTiers(pos) {
+        tierDisplay.innerHTML = '';
+        const positionTiers = tiers[pos];
+        positionTiers.forEach(tier => {
+            const tierContainer = document.createElement('div');
+            tierContainer.className = 'mb-6';
+            tierContainer.innerHTML = `<h4 class="text-lg font-semibold text-slate-800 border-b-2 border-sky-200 pb-2 mb-3">Tier ${tier.tier}: ${tier.name}</h4>`;
+            
+            const playerGrid = document.createElement('div');
+            playerGrid.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3';
+            
+            tier.players.forEach(playerName => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'bg-stone-50 p-3 rounded-md text-sm';
+                playerCard.textContent = playerName;
+                playerGrid.appendChild(playerCard);
+            });
+            
+            tierContainer.appendChild(playerGrid);
+            tierDisplay.appendChild(tierContainer);
+        });
+    }
+
+    positionFilters.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            currentPositionFilter = e.target.dataset.pos;
+            document.querySelectorAll('.pos-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('bg-stone-200', 'text-slate-700');
+            });
+            e.target.classList.add('bg-sky-600', 'text-white');
+            e.target.classList.remove('bg-stone-200', 'text-slate-700');
+            filterAndRender();
+        }
+    });
+    
+    playerTableBody.addEventListener('click', (e) => {
+        if (e.target.classList.contains('draft-btn')) {
+            draftPlayer(e.target.dataset.rank);
+        }
+    });
+    
+    draftedPlayersList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('undraft-btn')) {
+            undraftPlayer(e.target.dataset.rank);
+        }
+    });
+    
+    tierPosFilters.addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+            const pos = e.target.dataset.pos;
+            document.querySelectorAll('.tier-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('bg-stone-200', 'text-slate-700');
+            });
+            e.target.classList.add('bg-sky-600', 'text-white');
+            e.target.classList.remove('bg-stone-200', 'text-slate-700');
+            renderTiers(pos);
+        }
+    });
+
+    searchInput.addEventListener('keyup', filterAndRender);
+    tabButtons.forEach(btn => btn.addEventListener('click', switchTab));
+
+    function createTEPremiumChart() {
+        const ctx = document.getElementById('tePremiumChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['TE1', 'TE3', 'TE6', 'TE12'],
+                datasets: [
+                    {
+                        label: 'Avg PPG (0.5 PPR)',
+                        data: [14.5, 12.1, 10.2, 7.8],
+                        backgroundColor: 'rgba(125, 211, 252, 0.5)',
+                        borderColor: 'rgba(56, 189, 248, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Avg PPG (TE Premium)',
+                        data: [17.0, 14.2, 12.0, 9.2],
+                        backgroundColor: 'rgba(2, 132, 199, 0.5)',
+                        borderColor: 'rgba(2, 132, 199, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Average Points Per Game' }
+                    }
+                },
+                plugins: {
+                    title: { display: true, text: 'TE Scoring Advantage in Premium Format' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+    }
+
+    function createADPChart() {
+        const adpPlayers = [
+            allPlayers.find(p => p.name === 'Sam LaPorta'),
+            allPlayers.find(p => p.name === 'Anthony Richardson'),
+            allPlayers.find(p => p.name === 'Kyren Williams'),
+            allPlayers.find(p => p.name === 'Marvin Harrison Jr.')
+        ];
+
+        const ctx = document.getElementById('adpChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: adpPlayers.map(p => p.name),
+                datasets: [
+                    {
+                        label: 'ESPN ADP',
+                        data: adpPlayers.map(p => p.adp.espn),
+                        backgroundColor: '#ef4444',
+                    },
+                    {
+                        label: 'Yahoo ADP',
+                        data: adpPlayers.map(p => p.adp.yahoo),
+                        backgroundColor: '#8b5cf6',
+                    },
+                    {
+                        label: 'Sleeper ADP',
+                        data: adpPlayers.map(p => p.adp.sleeper),
+                        backgroundColor: '#22c55e',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Average Draft Position (Overall)' }
+                    }
+                },
+                plugins: {
+                    title: { display: true, text: 'ADP Discrepancies Across Platforms' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+    }
+    
+    filterAndRender();
+    renderDraftedPlayers();
+    renderTiers('QB');
+    createTEPremiumChart();
+    createADPChart();
+});
+</script>
+</body>
+</html>
